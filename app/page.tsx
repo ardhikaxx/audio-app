@@ -22,12 +22,14 @@ export default function LandingPage() {
   const [vocalPrintID, setVocalPrintID] = useState<string>("------");
   const [frequencyMonitorHeights, setFrequencyMonitorHeights] = useState<number[]>(Array(15).fill(50));
 
+  // Initialize random values after mount (client-only) in a separate effect
   useEffect(() => {
-    // Initialize random values only on client after hydration
     setVocalPrintGrid(Array(16).fill(false).map(() => Math.random() > 0.5));
     setVocalPrintID(Math.random().toString(36).substring(7).toUpperCase());
     setFrequencyMonitorHeights(Array(15).fill(0).map(() => Math.random() * 80 + 20));
+  }, []);
 
+  useEffect(() => {
     const interval = setInterval(() => {
       setHeatmapOpacity(Array.from({length: 32}, () => Math.random()));
       setConfidenceValues(['CNN_L1', 'CNN_L2', 'HYBRID_FUSION'].map(() => Math.floor(Math.random() * 20 + 80)));
