@@ -18,23 +18,11 @@ export default function LandingPage() {
   const [heatmapOpacity, setHeatmapOpacity] = useState<number[]>(Array(32).fill(0));
   const [confidenceValues, setConfidenceValues] = useState<number[]>(Array(3).fill(0));
 
-  // These values are client-only and never change after mount — use refs to avoid
-  // setState-in-effect warnings while still preventing SSR/client hydration mismatch.
-  const [mounted, setMounted] = useState(false);
-  const vocalPrintGridRef = useRef<boolean[]>(Array(16).fill(false));
-  const vocalPrintIDRef = useRef<string>("------");
-  const frequencyMonitorHeightsRef = useRef<number[]>(Array(15).fill(50));
-
-  useEffect(() => {
-    vocalPrintGridRef.current = Array(16).fill(false).map(() => Math.random() > 0.5);
-    vocalPrintIDRef.current = Math.random().toString(36).substring(7).toUpperCase();
-    frequencyMonitorHeightsRef.current = Array(15).fill(0).map(() => Math.random() * 80 + 20);
-    setMounted(true);
-  }, []);
-
-  const vocalPrintGrid = mounted ? vocalPrintGridRef.current : Array(16).fill(false);
-  const vocalPrintID = mounted ? vocalPrintIDRef.current : "------";
-  const frequencyMonitorHeights = mounted ? frequencyMonitorHeightsRef.current : Array(15).fill(50);
+  // These values are client-only and never change after mount — use state to avoid
+  // ref-access-during-render warnings while still preventing SSR/client hydration mismatch.
+  const [vocalPrintGrid, setVocalPrintGrid] = useState<boolean[]>(() => Array(16).fill(false).map(() => Math.random() > 0.5));
+  const [vocalPrintID, setVocalPrintID] = useState<string>(() => Math.random().toString(36).substring(7).toUpperCase());
+  const [frequencyMonitorHeights, setFrequencyMonitorHeights] = useState<number[]>(() => Array(15).fill(0).map(() => Math.random() * 80 + 20));
 
   useEffect(() => {
     const interval = setInterval(() => {
