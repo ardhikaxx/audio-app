@@ -17,9 +17,9 @@ export default function LandingPage() {
   const [visualizerData, setVisualizerData] = useState<number[]>(Array(20).fill(10));
   const [heatmapOpacity, setHeatmapOpacity] = useState<number[]>(Array(32).fill(0));
   const [confidenceValues, setConfidenceValues] = useState<number[]>(Array(3).fill(0));
-  const [vocalPrintGrid, setVocalPrintGrid] = useState<boolean[]>(() => Array(16).fill(false).map(() => Math.random() > 0.5));
+  const [vocalPrintGrid] = useState<boolean[]>(() => Array(16).fill(false).map(() => Math.random() > 0.5));
   const [vocalPrintID] = useState<string>(() => Math.random().toString(36).substring(7).toUpperCase());
-  const [frequencyMonitorHeights, setFrequencyMonitorHeights] = useState<number[]>(() => Array(15).fill(0).map(() => Math.random() * 80 + 20));
+  const [frequencyMonitorHeights] = useState<number[]>(() => Array(15).fill(0).map(() => Math.random() * 80 + 20));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -147,7 +147,7 @@ export default function LandingPage() {
         <section className="relative flex flex-col items-center justify-start min-h-[80vh] mb-24 -mt-16 pt-0 overflow-visible perspective-1000 z-10">
           {/* Neural Matrix Background */}
           <div className="absolute inset-0 -z-20">
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#C92712_1px,transparent_1px)] [background-size:30px_30px]"></div>
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#C92712_1px,transparent_1px)] bg-size-[30px_30px]"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-transparent to-[#0a0a0a]"></div>
             
             {/* Moving Light Orbs */}
@@ -196,8 +196,8 @@ export default function LandingPage() {
             <div className="bg-[#111] border-2 border-[#C92712] p-5 shadow-[12px_12px_0px_0px_white] rotate-[2deg]">
               <div className="flex gap-4 items-start">
                 <div className="w-16 h-16 bg-white/10 border border-white/20 flex flex-wrap p-1">
-                  {vocalPrintGrid.map((filled, i) => (
-                    <div key={i} className={`w-1/4 h-1/4 border-[0.5px] border-black/50 ${filled ? 'bg-[#C92712]' : 'bg-transparent'}`}></div>
+                  {vocalPrintGrid.map((isOn, i) => (
+                    <div key={i} className={`w-1/4 h-1/4 border-[0.5px] border-black/50 ${isOn ? 'bg-[#C92712]' : 'bg-transparent'}`}></div>
                   ))}
                 </div>
                 <div>
@@ -266,7 +266,7 @@ export default function LandingPage() {
                     <span className="relative z-10 group-hover:text-black transition-colors">Start Verification</span>
                   </button>
 
-                  <div className="grid grid-cols-2 gap-8 border-l-4 border-white/10 pl-10 hidden md:grid">
+                  <div className="grid grid-cols-2 gap-8 border-l-4 border-white/10 pl-10 md:grid">
                     <div>
                       <p className="text-[10px] font-black text-zinc-600 uppercase mb-1">Session_Token</p>
                       <p className="text-xl font-black italic">TR-9902-X</p>
@@ -428,7 +428,7 @@ export default function LandingPage() {
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                           </button>
                         </div>
-                        <audio src={audioURL} controls className="w-full h-8 brightness-90 contrast-125" />
+                        <audio src={audioURL ?? undefined} controls className="w-full h-8 brightness-90 contrast-125" />
                       </div>
                     )}
                   </div>
@@ -457,35 +457,39 @@ export default function LandingPage() {
         </section>
 
         {/* Result Section */}
-        {result && (
-          <section id="result-section" className="mb-32 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <div className={`p-1 border-4 shadow-[12px_12px_0px_0px_white] ${result.label.includes("FAKE") ? "border-[#C92712] bg-[#C92712]/10" : "border-green-500 bg-green-500/10"}`}>
-              <div className="bg-black p-8 md:p-12 text-center border-2 border-white/10">
-                <h2 className="text-2xl font-black uppercase italic text-zinc-500 mb-2">Hasil Analisis AI</h2>
-                <div className={`text-5xl md:text-7xl font-black uppercase italic mb-6 tracking-tighter ${result.label.includes("FAKE") ? "text-[#C92712]" : "text-green-500"}`}>
-                  {result.label}
-                </div>
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-full max-w-md h-4 bg-zinc-900 border border-white/20">
-                    <div 
-                      className={`h-full transition-all duration-1000 ${result.label.includes("FAKE") ? "bg-[#C92712]" : "bg-green-500"}`}
-                      style={{ width: `${result.confidence}%` }}
-                    ></div>
+        {result !== null && (() => {
+          const { label, confidence } = result;
+          const isFake = label.includes("FAKE");
+          return (
+            <section id="result-section" className="mb-32 animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <div className={`p-1 border-4 shadow-[12px_12px_0px_0px_white] ${isFake ? "border-[#C92712] bg-[#C92712]/10" : "border-green-500 bg-green-500/10"}`}>
+                <div className="bg-black p-8 md:p-12 text-center border-2 border-white/10">
+                  <h2 className="text-2xl font-black uppercase italic text-zinc-500 mb-2">Hasil Analisis AI</h2>
+                  <div className={`text-5xl md:text-7xl font-black uppercase italic mb-6 tracking-tighter ${isFake ? "text-[#C92712]" : "text-green-500"}`}>
+                    {label}
                   </div>
-                  <p className="text-xl font-bold uppercase italic tracking-widest">
-                    Confidence: <span className="text-white">{result.confidence}%</span>
-                  </p>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-full max-w-md h-4 bg-zinc-900 border border-white/20">
+                      <div
+                        className={`h-full transition-all duration-1000 ${isFake ? "bg-[#C92712]" : "bg-green-500"}`}
+                        style={{ width: `${confidence}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xl font-bold uppercase italic tracking-widest">
+                      Confidence: <span className="text-white">{confidence}%</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => { setSelectedFile(null); setAudioBlob(null); setAudioURL(null); setResult(null); }}
+                    className="mt-12 px-8 py-3 bg-white text-black font-black uppercase italic border-2 border-black hover:bg-zinc-200 transition-colors"
+                  >
+                    Cek Audio Lain
+                  </button>
                 </div>
-                <button 
-                  onClick={() => { setSelectedFile(null); setAudioBlob(null); setAudioURL(null); setResult(null); }}
-                  className="mt-12 px-8 py-3 bg-white text-black font-black uppercase italic border-2 border-black hover:bg-zinc-200 transition-colors"
-                >
-                  Cek Audio Lain
-                </button>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          );
+        })()}
 
         {/* How It Works Section */}
         <section id="cara-kerja" className="mb-32">
