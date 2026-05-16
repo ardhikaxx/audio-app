@@ -15,6 +15,20 @@ export default function LandingPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const [visualizerData, setVisualizerData] = useState<number[]>(Array(20).fill(10));
+  const [heatmapOpacity, setHeatmapOpacity] = useState<number[]>(Array(32).fill(0));
+  const [confidenceValues, setConfidenceValues] = useState<number[]>(Array(3).fill(0));
+  const [vocalPrintGrid, setVocalPrintGrid] = useState<boolean[]>(() => Array(16).fill(false).map(() => Math.random() > 0.5));
+  const [vocalPrintID] = useState<string>(() => Math.random().toString(36).substring(7).toUpperCase());
+  const [frequencyMonitorHeights, setFrequencyMonitorHeights] = useState<number[]>(() => Array(15).fill(0).map(() => Math.random() * 80 + 20));
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeatmapOpacity(Array.from({length: 32}, () => Math.random()));
+      setConfidenceValues(['CNN_L1', 'CNN_L2', 'HYBRID_FUSION'].map(() => Math.floor(Math.random() * 20 + 80)));
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Handle File Upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,31 +163,31 @@ export default function LandingPage() {
                 <p className="text-[10px] font-black uppercase tracking-widest text-[#C92712]">Spectral_Heatmap</p>
                 <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
               </div>
-              <div className="grid grid-cols-8 gap-1">
-                {[...Array(32)].map((_, i) => (
-                  <div key={i} className="h-4 w-full bg-[#C92712]" style={{ opacity: Math.random() }}></div>
-                ))}
-              </div>
+               <div className="grid grid-cols-8 gap-1">
+                 {[...Array(32)].map((_, i) => (
+                   <div key={i} className="h-4 w-full bg-[#C92712]" style={{ opacity: heatmapOpacity[i] }}></div>
+                 ))}
+               </div>
               <p className="mt-3 text-[8px] font-mono text-zinc-600">RESOLUTION: 24-BIT / 192KHZ</p>
             </div>
 
-            {/* Neural Confidence Matrix */}
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rotate-[-1deg]">
-              <p className="text-[9px] font-black text-zinc-500 uppercase mb-4 tracking-[0.2em]">Confidence_Matrix</p>
-              <div className="space-y-3">
-                {['CNN_L1', 'CNN_L2', 'HYBRID_FUSION'].map((label, i) => (
-                  <div key={i} className="space-y-1">
-                    <div className="flex justify-between text-[8px] font-bold">
-                      <span>{label}</span>
-                      <span>{Math.floor(Math.random() * 20 + 80)}%</span>
-                    </div>
-                    <div className="w-full h-1 bg-zinc-800">
-                      <div className="h-full bg-[#C92712]" style={{ width: `${Math.random() * 30 + 70}%` }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+             {/* Neural Confidence Matrix */}
+             <div className="bg-white/5 backdrop-blur-md border border-white/10 p-5 rotate-[-1deg]">
+               <p className="text-[9px] font-black text-zinc-500 uppercase mb-4 tracking-[0.2em]">Confidence_Matrix</p>
+               <div className="space-y-3">
+                 {['CNN_L1', 'CNN_L2', 'HYBRID_FUSION'].map((label, i) => (
+                   <div key={i} className="space-y-1">
+                     <div className="flex justify-between text-[8px] font-bold">
+                       <span>{label}</span>
+                       <span>{confidenceValues[i]}%</span>
+                     </div>
+                     <div className="w-full h-1 bg-zinc-800">
+                       <div className="h-full bg-[#C92712]" style={{ width: `${confidenceValues[i] * 0.3 + 70}%` }}></div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             </div>
           </div>
 
           {/* Ultra-Detail HUD Elements (Right) */}
@@ -182,13 +196,13 @@ export default function LandingPage() {
             <div className="bg-[#111] border-2 border-[#C92712] p-5 shadow-[12px_12px_0px_0px_white] rotate-[2deg]">
               <div className="flex gap-4 items-start">
                 <div className="w-16 h-16 bg-white/10 border border-white/20 flex flex-wrap p-1">
-                  {[...Array(16)].map((_, i) => (
-                    <div key={i} className={`w-1/4 h-1/4 border-[0.5px] border-black/50 ${Math.random() > 0.5 ? 'bg-[#C92712]' : 'bg-transparent'}`}></div>
+                  {vocalPrintGrid.map((filled, i) => (
+                    <div key={i} className={`w-1/4 h-1/4 border-[0.5px] border-black/50 ${filled ? 'bg-[#C92712]' : 'bg-transparent'}`}></div>
                   ))}
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-white uppercase italic">Vocal_Print_ID</p>
-                  <p className="text-[8px] text-zinc-500 font-mono mt-1">S_ID: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+                  <p className="text-[8px] text-zinc-500 font-mono mt-1">S_ID: {vocalPrintID}</p>
                   <p className="text-[8px] text-zinc-500 font-mono">STATUS: VERIFIED</p>
                 </div>
               </div>
@@ -198,8 +212,8 @@ export default function LandingPage() {
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-4 w-full">
               <p className="text-[9px] font-black uppercase text-right text-zinc-400 mb-2 tracking-widest">Live_Freq_Monitor</p>
               <div className="h-20 flex items-center justify-center gap-1">
-                {[...Array(15)].map((_, i) => (
-                  <div key={i} className="w-2 bg-gradient-to-t from-[#C92712] to-white/20" style={{ height: `${Math.random() * 80 + 20}%` }}></div>
+                {frequencyMonitorHeights.map((h, i) => (
+                  <div key={i} className="w-2 bg-gradient-to-t from-[#C92712] to-white/20" style={{ height: `${h}%` }}></div>
                 ))}
               </div>
             </div>
