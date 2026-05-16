@@ -17,11 +17,17 @@ export default function LandingPage() {
   const [visualizerData, setVisualizerData] = useState<number[]>(Array(20).fill(10));
   const [heatmapOpacity, setHeatmapOpacity] = useState<number[]>(Array(32).fill(0));
   const [confidenceValues, setConfidenceValues] = useState<number[]>(Array(3).fill(0));
-  const [vocalPrintGrid] = useState<boolean[]>(() => Array(16).fill(false).map(() => Math.random() > 0.5));
-  const [vocalPrintID] = useState<string>(() => Math.random().toString(36).substring(7).toUpperCase());
-  const [frequencyMonitorHeights] = useState<number[]>(() => Array(15).fill(0).map(() => Math.random() * 80 + 20));
+  // Use deterministic initial values to avoid SSR/client hydration mismatch
+  const [vocalPrintGrid, setVocalPrintGrid] = useState<boolean[]>(Array(16).fill(false));
+  const [vocalPrintID, setVocalPrintID] = useState<string>("------");
+  const [frequencyMonitorHeights, setFrequencyMonitorHeights] = useState<number[]>(Array(15).fill(50));
 
   useEffect(() => {
+    // Initialize random values only on client after hydration
+    setVocalPrintGrid(Array(16).fill(false).map(() => Math.random() > 0.5));
+    setVocalPrintID(Math.random().toString(36).substring(7).toUpperCase());
+    setFrequencyMonitorHeights(Array(15).fill(0).map(() => Math.random() * 80 + 20));
+
     const interval = setInterval(() => {
       setHeatmapOpacity(Array.from({length: 32}, () => Math.random()));
       setConfidenceValues(['CNN_L1', 'CNN_L2', 'HYBRID_FUSION'].map(() => Math.floor(Math.random() * 20 + 80)));
